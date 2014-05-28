@@ -1,7 +1,7 @@
 {
   "name": "multer-autoreap",
   "version": "0.0.3",
-  "description": "Connect middleware for auto gc of uploaded files by multer or any multipart middleware.",
+  "description": "Connect middleware for auto gc of tmp uploaded files by multer or any multipart middleware.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"No tests included.\""

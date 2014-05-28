@@ -1,0 +1,27 @@
+{
+  "name": "multer-autoreap",
+  "version": "0.0.1",
+  "description": "Express middleware for auto cleanup (reap) uploaded files by multer or any multipart middleware propagating req.files.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests included.\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joelabair/multer-autoreap.git"
+  },
+  "keywords": [
+    "multer",
+    "reap",
+    "multipart",
+    "unlink"
+  ],
+  "author": "Joel A. Bair <joel.a.bair@gmail.com>",
+  "license": "GPLv3",
+  "bugs": {
+    "url": "https://github.com/joelabair/multer-autoreap/issues"
+  },
+  "dependencies": {
+    "debug": "~0.8.1"
+  }
+}

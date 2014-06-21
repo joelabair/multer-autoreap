@@ -11,6 +11,7 @@ module.exports = function(req, res, next) {
 			for(var key in req.files) {
 				if (req.files.hasOwnProperty(key)) {
 					file = req.files[key];
+					delete req.files[key]; // avoids double stats
 					fs.stat(file.path, function(err, stats) {
 						if (!err && stats.isFile()) {
 							fs.unlink(file.path);

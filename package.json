@@ -1,10 +1,10 @@
 {
   "name": "multer-autoreap",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Connect middleware providing auto gc of tmp uploaded files by multer or any multipart middleware.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"No tests included.\""
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -27,5 +27,12 @@
   },
   "dependencies": {
     "debug": "~0.8.1"
+  },
+  "devDependencies": {
+    "chai": "*",
+    "mocha": "*",
+    "supertest": "*",
+	"express": "*",
+	"multer": "*"
   }
 }

@@ -40,7 +40,7 @@ module.exports = function(req, res, next) {
 	};
 
 	res.on('error', function(err) {
-		console.log(err);
+		reapFiles(err);
 	});
 
 	finished(res, reapFiles);

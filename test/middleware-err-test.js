@@ -63,12 +63,12 @@ app.use(function(err, req, res, next){
 // and now for the tests
 describe('Multer Autoreap with Errors', function() {
 	request = request(app),
-	lastReapedFile = {};
+	lastReapedFile = null
 
 	describe('POST /upload', function(){
 
 		beforeEach(function() {
-			lastReapedFile = {};
+			lastReapedFile = null;
 		});
 
 		it('can upload a file with an error in the response', function(done) {
@@ -81,10 +81,7 @@ describe('Multer Autoreap with Errors', function() {
 				.expect(200)
 				.end(function(err, res) {
 					if (err && err.message !== 'socket hang up') return done(err);
-					expect(lastReapedFile.path).not.to.exist;
-					expect(lastReapedFile.fieldname).not.to.exist;
-					expect(lastReapedFile.originalname).not.to.exist;
-					fs.unlink(lastReapedFile.path);
+					expect(lastReapedFile).to.be.null;
 					done();
 				});
 
@@ -95,7 +92,7 @@ describe('Multer Autoreap with Errors', function() {
 	describe('PUT /upload', function() {
 
 		beforeEach(function() {
-			lastReapedFile = {};
+			lastReapedFile = null;
 		});
 
 		it('can upload a file with an error in the response', function(done) {
@@ -108,10 +105,7 @@ describe('Multer Autoreap with Errors', function() {
 				.expect(200)
 				.end(function(err, res){
 					if (err && err.message !== 'socket hang up') return done(err);
-					expect(lastReapedFile.path).not.to.exist;
-					expect(lastReapedFile.fieldname).not.to.exist;
-					expect(lastReapedFile.originalname).not.to.exist;
-					fs.unlink(lastReapedFile.path);
+					expect(lastReapedFile).to.be.null;
 					done();
 				});
 

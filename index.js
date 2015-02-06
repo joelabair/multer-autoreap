@@ -29,7 +29,9 @@ module.exports = function(req, res, next) {
 					delete req.files[key]; // avoids stating previously reaped files
 					fs.stat(file.path, function(err, stats) {
 						if (!err && stats.isFile()) {
-							fs.unlink(file.path);
+							fs.unlink(file.path, function(err) {
+								if (err) throw err;
+							});
 							debug('removed %s', file.path);
 							res.emit('autoreap', file);
 						}

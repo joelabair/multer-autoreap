@@ -22,7 +22,7 @@ module.exports = function(req, res, next) {
 			for(var key in req.files) {
 				if (req.files.hasOwnProperty(key)) {
 					file = req.files[key];
-					if (!Array.isArray(file)) {
+					if (!(file instanceof Array)) {
 						file = [file];
 					}
 					delete req.files[key]; // avoids stating previously reaped files

@@ -22,17 +22,22 @@ module.exports = function(req, res, next) {
 			for(var key in req.files) {
 				if (req.files.hasOwnProperty(key)) {
 					file = req.files[key];
-					if (err && (options && !options.reapOnError)) {
-						debug('skipped auto removal of %s - please manually deprecate.',  file.path);
-						continue;
+					if (!(file instanceof Array)) {
+						file = [file];
 					}
 					delete req.files[key]; // avoids stating previously reaped files
-					fs.stat(file.path, function(err, stats) {
-						if (!err && stats.isFile()) {
-							fs.unlink(file.path);
-							debug('removed %s', file.path);
-							res.emit('autoreap', file);
+					file.forEach(function(file) {
+						if (err && (options && !options.reapOnError)) {
+							debug('skipped auto removal of %s - please manually deprecate.',  file.path);
+							return;
 						}
+						fs.stat(file.path, function(err, stats) {
+							if (!err && stats.isFile()) {
+								fs.unlink(file.path);
+								debug('removed %s', file.path);
+								res.emit('autoreap', file);
+							}
+						});
 					});
 				}
 			}

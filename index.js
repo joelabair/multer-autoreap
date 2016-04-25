@@ -16,31 +16,39 @@ var options = Object.create(defaults);
 // or delete the req.files[key] before the response end.
 module.exports = function(req, res, next) {
 
+	var processFile = function processFile(err, file) {
+		if (err && (options && !options.reapOnError)) {
+			debug('skipped auto removal of %s - please manually deprecate.',  file.path);
+			return;
+		}
+		fs.stat(file.path, function(err, stats) {
+			if (!err && stats.isFile()) {
+				fs.unlink(file.path);
+				debug('removed %s', file.path);
+				res.emit('autoreap', file);
+			}
+		});
+	};
+	
 	var reapFiles = function reapFiles(err) {
-		var file;
+		var file, done = [];
 		if (typeof req.files === "object") {
 			for(var key in req.files) {
-				if (req.files.hasOwnProperty(key)) {
+				if (req.files.hasOwnProperty(key) && !~done.indexOf(key)) {
 					file = req.files[key];
 					if (!(file instanceof Array)) {
 						file = [file];
 					}
-					delete req.files[key]; // avoids stating previously reaped files
 					file.forEach(function(file) {
-						if (err && (options && !options.reapOnError)) {
-							debug('skipped auto removal of %s - please manually deprecate.',  file.path);
-							return;
-						}
-						fs.stat(file.path, function(err, stats) {
-							if (!err && stats.isFile()) {
-								fs.unlink(file.path);
-								debug('removed %s', file.path);
-								res.emit('autoreap', file);
-							}
-						});
+						processFile(err, file);
 					});
+					done.push(key);
 				}
 			}
+		}
+		if (typeof req.file === "object") {
+			file = req.file;
+			processFile(err, file);
 		}
 	};
 

@@ -15,13 +15,14 @@ var app = express();
 var os = require('os');
 
 // parse multipart/form-data params and files wtitten to tmp dir.
-app.use(multer({ dest:  os.tmpdir()}));
+var upload = multer({ dest:  os.tmpdir()});
+app.use(upload.any());
 
 // cleanup uploaded files on response end
 app.use(autoReap);
 
 var uploadHandler = function uploadHander(req, res, next) {
-	var file = null;
+	var file = req.file;
 
 	res.on('autoreap', function(reapedFile){
 		lastReapedFile = reapedFile;
@@ -30,8 +31,11 @@ var uploadHandler = function uploadHander(req, res, next) {
 	for(var key in req.files) {
 		if (req.files.hasOwnProperty(key)) {
 			file = req.files[key];
-			console.log('Recieved file: %s', file.originalname);
 		}
+	}
+	
+	if (file) {
+		console.log('Recieved file: %s', file.originalname);
 	}
 
 	// we have some files ?
@@ -42,6 +46,9 @@ var uploadHandler = function uploadHander(req, res, next) {
 	}
 };
 
+
+app.route('/upload-single').post(upload.single('file-data'), uploadHandler);
+app.route('/upload-single').put(upload.single('file-data'), uploadHandler);
 
 app.route('/upload').post(uploadHandler);
 app.route('/upload').put(uploadHandler);
@@ -64,7 +71,6 @@ describe('Multer Autoreap', function() {
 	lastReapedFile = {};
 
 	describe('POST /upload', function(){
-
 		beforeEach(function() {
 			lastReapedFile = {};
 		});
@@ -84,13 +90,27 @@ describe('Multer Autoreap', function() {
 					expect(lastReapedFile.originalname).to.equal('unit_test.txt');
 					done();
 				});
-
 		});
+		
+		it('supports multer.single', function(done) {
+			var file = __dirname + '/unit_test.txt';
 
+			request
+				.post('/upload-single')
+				.set('Accept', '*/*')
+				.attach('file-data', file, 'unit_test.txt')
+				.expect(200)
+				.end(function(err, res){
+					if (err) return done(err);
+					expect(res.text).to.equal('Ok!');
+					expect(lastReapedFile.fieldname).to.equal('file-data');
+					expect(lastReapedFile.originalname).to.equal('unit_test.txt');
+					done();
+				});
+		});
 	});
 
 	describe('PUT /upload', function() {
-
 		beforeEach(function() {
 			lastReapedFile = {};
 		});
@@ -110,9 +130,24 @@ describe('Multer Autoreap', function() {
 					expect(lastReapedFile.originalname).to.equal('unit_test.txt');
 					done();
 				});
-
 		});
+		
+		it('supports multer.single', function(done) {
+			var file = __dirname + '/unit_test.txt';
 
+			request
+				.post('/upload-single')
+				.set('Accept', '*/*')
+				.attach('file-data', file, 'unit_test.txt')
+				.expect(200)
+				.end(function(err, res){
+					if (err) return done(err);
+					expect(res.text).to.equal('Ok!');
+					expect(lastReapedFile.fieldname).to.equal('file-data');
+					expect(lastReapedFile.originalname).to.equal('unit_test.txt');
+					done();
+				});
+		});
 	});
 
 });

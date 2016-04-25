@@ -19,7 +19,8 @@ var os = require('os');
 var fs = require('fs');
 
 // parse multipart/form-data params and files wtitten to tmp dir.
-app.use(multer({ dest:  os.tmpdir()}));
+var upload = multer({ dest:  os.tmpdir()});
+app.use(upload.any());
 
 // cleanup uploaded files on response end
 app.use(autoReap);
@@ -42,6 +43,10 @@ var uploadHandler = function uploadHander(req, res, next) {
 	throw new Error('test');
 	next(new Error('test'));
 };
+
+
+app.route('/upload-single').post(upload.single('file-data'), uploadHandler);
+app.route('/upload-single').put(upload.single('file-data'), uploadHandler);
 
 app.route('/upload').post(uploadHandler);
 app.route('/upload').put(uploadHandler);
@@ -86,6 +91,22 @@ describe('Multer Autoreap with Errors', function() {
 				});
 
 		});
+		
+		it('supports multer.single with an error in the response', function(done) {
+			var file = __dirname + '/unit_test.txt';
+
+			request
+				.post('/upload-single')
+				.set('Accept', '*/*')
+				.attach('file-data', file, 'unit_test.txt')
+				.expect(200)
+				.end(function(err, res) {
+					if (err && err.message !== 'socket hang up') return done(err);
+					expect(lastReapedFile).to.be.null;
+					done();
+				});
+
+		});
 
 	});
 
@@ -111,6 +132,22 @@ describe('Multer Autoreap with Errors', function() {
 
 		});
 
+		it('supports multer.single with an error in the response', function(done) {
+			var file = __dirname + '/unit_test.txt';
+
+			request
+				.put('/upload-single')
+				.set('Accept', '*/*')
+				.attach('file-data', file, 'unit_test.txt')
+				.expect(200)
+				.end(function(err, res){
+					if (err && err.message !== 'socket hang up') return done(err);
+					expect(lastReapedFile).to.be.null;
+					done();
+				});
+
+		});
+		
 	});
 
 });

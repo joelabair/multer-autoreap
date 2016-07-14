@@ -33,7 +33,7 @@ var uploadHandler = function uploadHander(req, res, next) {
 			file = req.files[key];
 		}
 	}
-	
+
 	if (file) {
 		console.log('Recieved file: %s', file.originalname);
 	}
@@ -78,6 +78,12 @@ describe('Multer Autoreap', function() {
 		it('can upload a file', function(done) {
 			var file = __dirname + '/unit_test.txt';
 
+			var evalReaped = function() {
+				expect(lastReapedFile.fieldname).to.equal('file-data');
+				expect(lastReapedFile.originalname).to.equal('unit_test.txt');
+				done();
+			};
+
 			request
 				.post('/upload')
 				.set('Accept', '*/*')
@@ -86,14 +92,18 @@ describe('Multer Autoreap', function() {
 				.end(function(err, res){
 					if (err) return done(err);
 					expect(res.text).to.equal('Ok!');
-					expect(lastReapedFile.fieldname).to.equal('file-data');
-					expect(lastReapedFile.originalname).to.equal('unit_test.txt');
-					done();
+					setTimeout(evalReaped, 50);
 				});
 		});
-		
+
 		it('supports multer.single', function(done) {
 			var file = __dirname + '/unit_test.txt';
+
+			var evalReaped = function() {
+				expect(lastReapedFile.fieldname).to.equal('file-data');
+				expect(lastReapedFile.originalname).to.equal('unit_test.txt');
+				done();
+			};
 
 			request
 				.post('/upload-single')
@@ -103,9 +113,7 @@ describe('Multer Autoreap', function() {
 				.end(function(err, res){
 					if (err) return done(err);
 					expect(res.text).to.equal('Ok!');
-					expect(lastReapedFile.fieldname).to.equal('file-data');
-					expect(lastReapedFile.originalname).to.equal('unit_test.txt');
-					done();
+					setTimeout(evalReaped, 50);
 				});
 		});
 	});
@@ -118,6 +126,12 @@ describe('Multer Autoreap', function() {
 		it('can upload a file', function(done) {
 			var file = __dirname + '/unit_test.txt';
 
+			var evalReaped = function() {
+				expect(lastReapedFile.fieldname).to.equal('file-data');
+				expect(lastReapedFile.originalname).to.equal('unit_test.txt');
+				done();
+			};
+
 			request
 				.post('/upload')
 				.set('Accept', '*/*')
@@ -126,14 +140,18 @@ describe('Multer Autoreap', function() {
 				.end(function(err, res){
 					if (err) return done(err);
 					expect(res.text).to.equal('Ok!');
-					expect(lastReapedFile.fieldname).to.equal('file-data');
-					expect(lastReapedFile.originalname).to.equal('unit_test.txt');
-					done();
+					setTimeout(evalReaped, 50);
 				});
 		});
-		
+
 		it('supports multer.single', function(done) {
 			var file = __dirname + '/unit_test.txt';
+
+			var evalReaped = function() {
+				expect(lastReapedFile.fieldname).to.equal('file-data');
+				expect(lastReapedFile.originalname).to.equal('unit_test.txt');
+				done();
+			};
 
 			request
 				.post('/upload-single')
@@ -143,9 +161,7 @@ describe('Multer Autoreap', function() {
 				.end(function(err, res){
 					if (err) return done(err);
 					expect(res.text).to.equal('Ok!');
-					expect(lastReapedFile.fieldname).to.equal('file-data');
-					expect(lastReapedFile.originalname).to.equal('unit_test.txt');
-					done();
+					setTimeout(evalReaped, 50);
 				});
 		});
 	});

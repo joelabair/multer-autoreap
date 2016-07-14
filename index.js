@@ -29,12 +29,12 @@ module.exports = function(req, res, next) {
 			}
 		});
 	};
-	
+
 	var reapFiles = function reapFiles(err) {
 		var file, done = [];
 		if (typeof req.files === "object") {
 			for(var key in req.files) {
-				if (req.files.hasOwnProperty(key) && !~done.indexOf(key)) {
+				if (Object.prototype.hasOwnProperty.call(req.files, key) && !~done.indexOf(key)) {
 					file = req.files[key];
 					if (!(file instanceof Array)) {
 						file = [file];

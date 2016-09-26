@@ -1,6 +1,5 @@
 var fs = require('fs'),
 	  util = require('util'),
-	  finished = require('finished'),
 	  debug = require('debug')('multer-autoreap:middleware');
 
 
@@ -52,11 +51,9 @@ module.exports = function(req, res, next) {
 		}
 	};
 
-	res.on('error', function(err) {
-		reapFiles(err);
-	});
+	res.on('error', reapFiles);
+	res.on('finish', reapFiles);
 
-	finished(res, reapFiles);
 	next();
 
 };

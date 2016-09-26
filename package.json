@@ -1,7 +1,8 @@
 {
   "name": "multer-autoreap",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Connect middleware providing auto gc of tmp uploaded files by multer or any multipart middleware.",
+  "license": "GPLv3",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
@@ -21,19 +22,18 @@
     "reaper"
   ],
   "author": "Joel A. Bair <joel.a.bair@gmail.com>",
-  "license": "GPLv3",
   "bugs": {
     "url": "https://github.com/joelabair/multer-autoreap/issues"
   },
   "dependencies": {
-    "debug": "~1.0.2",
-    "finished": "~1.2.2"
+    "debug": "^2.2.0",
+    "finished": "^1.2.2"
   },
   "devDependencies": {
-    "chai": "~1.9.1",
-    "mocha": "~1.20.1",
-    "supertest": "~0.13.0",
+    "chai": "^3.5.x",
     "express": "~4.4.4",
-    "multer": "~1.1.0"
+    "mocha": "^3.0.2",
+    "multer": "^1.2.0",
+    "supertest": "^0.15.0"
   }
 }

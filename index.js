@@ -1,6 +1,6 @@
 var fs = require('fs'),
 	  util = require('util'),
-	  finished = require('finished'),
+	  finished = require('on-finished'),
 	  debug = require('debug')('multer-autoreap:middleware');
 
 
@@ -23,15 +23,20 @@ module.exports = function(req, res, next) {
 		}
 		fs.stat(file.path, function(err, stats) {
 			if (!err && stats.isFile()) {
-				fs.unlink(file.path);
-				debug('removed %s', file.path);
-				res.emit('autoreap', file);
+				fs.unlink(file.path, function(err) {
+					if (err ) return console.warn(err);
+					debug('removed %s', file.path);
+					res.emit('autoreap', file);
+				});
 			}
 		});
 	};
 
 	var reapFiles = function reapFiles(err) {
 		var file, done = [];
+		var mapFn = function(file) {
+			processFile(err, file);
+		};
 		if (typeof req.files === "object") {
 			for(var key in req.files) {
 				if (Object.prototype.hasOwnProperty.call(req.files, key) && !~done.indexOf(key)) {
@@ -39,9 +44,7 @@ module.exports = function(req, res, next) {
 					if (!(file instanceof Array)) {
 						file = [file];
 					}
-					file.forEach(function(file) {
-						processFile(err, file);
-					});
+					file.forEach(mapFn);
 					done.push(key);
 				}
 			}
@@ -52,11 +55,8 @@ module.exports = function(req, res, next) {
 		}
 	};
 
-	res.on('error', function(err) {
-		reapFiles(err);
-	});
+ 	finished(res, reapFiles);
 
-	finished(res, reapFiles);
 	next();
 
 };

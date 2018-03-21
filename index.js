@@ -1,14 +1,14 @@
-var fs = require('fs'),
-	  util = require('util'),
-	  finished = require('on-finished'),
-	  debug = require('debug')('multer-autoreap:middleware');
+const fs = require('fs');
+const util = require('util');
+const finished = require('on-finished');
+const debug = require('debug')('multer-autoreap:middleware');
 
 
-var defaults = {
+const defaults = {
 	reapOnError: true
 };
 
-var options = Object.create(defaults);
+let options = Object.create(defaults);
 
 
 // auto remove any uploaded files on response end
@@ -16,14 +16,14 @@ var options = Object.create(defaults);
 // or delete the req.files[key] before the response end.
 module.exports = function(req, res, next) {
 
-	var processFile = function processFile(err, file) {
+	const processFile = function processFile(err, file) {
 		if (err && (options && !options.reapOnError)) {
 			debug('skipped auto removal of %s - please manually deprecate.',  file.path);
 			return;
 		}
-		fs.stat(file.path, function(err, stats) {
+		fs.stat(file.path, (err, stats) => {
 			if (!err && stats.isFile()) {
-				fs.unlink(file.path, function(err) {
+				fs.unlink(file.path, err => {
 					if (err ) return console.warn(err);
 					debug('removed %s', file.path);
 					res.emit('autoreap', file);
@@ -32,33 +32,37 @@ module.exports = function(req, res, next) {
 		});
 	};
 
-	var reapFiles = function reapFiles(err) {
-		var file, done = [];
-		var mapFn = function(file) {
-			processFile(err, file);
-		};
-		if (typeof req.files === "object") {
-			for(var key in req.files) {
-				if (Object.prototype.hasOwnProperty.call(req.files, key) && !~done.indexOf(key)) {
-					file = req.files[key];
-					if (!(file instanceof Array)) {
-						file = [file];
-					}
-					file.forEach(mapFn);
-					done.push(key);
-				}
+	const reapFiles = function reapFiles(err) {
+		let done = [];
+		let queue = [];
+
+		if (req.file) {
+			queue = queue.concat(req.file);
+			debug('queued %s', req.file);
+		}
+
+		if (req.files) {
+			if (Array.isArray(req.files)) {
+				queue = queue.concat(req.files);
+				debug('queued %O', req.files);
+			} else {
+				Object.entries(req.files).forEach(([key, files]) => {
+					queue = queue.concat(files);
+					debug('queued %s, %O', key, files);
+				});
 			}
 		}
-		if (typeof req.file === "object") {
-			file = req.file;
-			processFile(err, file);
-		}
+
+		queue.forEach(file => {
+			if (!done.includes(file)) {
+				processFile(err, file);
+				done.push(file);
+			}
+		});
 	};
 
  	finished(res, reapFiles);
-
 	next();
-
 };
 
 

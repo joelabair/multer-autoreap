@@ -1,74 +1,77 @@
-var chai = require('chai');
+"use strict";
+
+// jshint mocha:true
+// jshint expr:true
+
+const chai = require('chai');
 chai.config.includeStack = true;
 
-var expect = chai.expect;
-var should = chai.should();
+const expect = chai.expect;
+const should = chai.should();
 
-var request = require('supertest');
-var express = require('express');
-var multer = require('multer');
+const supertest = require('supertest');
+const express = require('express');
+const multer = require('multer');
 
-var autoReap = require('../');
+const autoReap = require('../');
 autoReap.options.reapOnError =  false;
 
-var lastReapedFile = null;
-
 // Dummy http server.
-var app = express();
-var os = require('os');
-var fs = require('fs');
+const app = express();
+const os = require('os');
+const fs = require('fs');
 
 // parse multipart/form-data params and files wtitten to tmp dir.
-var upload = multer({ dest:  os.tmpdir()});
+const upload = multer({ dest:  os.tmpdir()});
 app.use(upload.any());
 
 // cleanup uploaded files on response end
 app.use(autoReap);
 
-var uploadHandler = function uploadHander(req, res, next) {
-	var file = null;
+let lastReapedFile = null;
+
+const uploadHandler = function uploadHander(req, res, next) {
+	let file = null;
 
 	res.on('autoreap', function(reapedFile){
 		lastReapedFile = reapedFile;
 	});
 
-	for(var key in req.files) {
+	for(let key in req.files) {
 		if (req.files.hasOwnProperty(key)) {
 			file = req.files[key];
 			console.log('Recieved file: %s', file.originalname);
 		}
 	}
+	res.status(500);
 
 	res.socket.emit('error', new Error('test'));
-	throw new Error('test');
+	//throw new Error('test');
 	next(new Error('test'));
 };
 
-
-app.route('/upload-single').post(upload.single('file-data'), uploadHandler);
-app.route('/upload-single').put(upload.single('file-data'), uploadHandler);
+app.route('/upload-single').post(uploadHandler);
+app.route('/upload-single').put(uploadHandler);
 
 app.route('/upload').post(uploadHandler);
 app.route('/upload').put(uploadHandler);
 
 app.route('/upload').all(function(req, res, next) {
-	res.send(405, 'Unsupported method!');
+	res.status(405).send('Unsupported method!');
 });
 
 // If we get here - nothing else handled us so send a status 404.
 app.use(function(req, res, next){
-	res.send(404, "Resource not found!\n" + req.url.replace(/[\?\#].*$/, ''));
+	res.status(404).send("Resource not found!\n" + req.url.replace(/[\?\#].*$/, ''));
 });
 
 app.use(function(err, req, res, next){
-	res.statusCode = 500
-	res.send('Error!');
+	res.status(500).send('Error!');
 });
 
 // and now for the tests
 describe('Multer Autoreap with Errors', function() {
-	request = request(app),
-	lastReapedFile = null
+	let request = supertest(app);
 
 	describe('POST /upload', function(){
 
@@ -77,30 +80,30 @@ describe('Multer Autoreap with Errors', function() {
 		});
 
 		it('can upload a file with an error in the response', function(done) {
-			var file = __dirname + '/unit_test.txt';
+			let file = __dirname + '/unit_test.txt';
 
 			request
 				.post('/upload')
 				.set('Accept', '*/*')
 				.attach('file-data', file, 'unit_test.txt')
-				.expect(200)
 				.end(function(err, res) {
+					expect(res).not.to.exist;
 					if (err && err.message !== 'socket hang up') return done(err);
 					expect(lastReapedFile).to.be.null;
 					done();
 				});
 
 		});
-		
+
 		it('supports multer.single with an error in the response', function(done) {
-			var file = __dirname + '/unit_test.txt';
+			let file = __dirname + '/unit_test.txt';
 
 			request
 				.post('/upload-single')
 				.set('Accept', '*/*')
 				.attach('file-data', file, 'unit_test.txt')
-				.expect(200)
 				.end(function(err, res) {
+					expect(res).not.to.exist;
 					if (err && err.message !== 'socket hang up') return done(err);
 					expect(lastReapedFile).to.be.null;
 					done();
@@ -117,14 +120,14 @@ describe('Multer Autoreap with Errors', function() {
 		});
 
 		it('can upload a file with an error in the response', function(done) {
-			var file = __dirname + '/unit_test.txt';
+			let file = __dirname + '/unit_test.txt';
 
 			request
 				.put('/upload')
 				.set('Accept', '*/*')
 				.attach('file-data', file, 'unit_test.txt')
-				.expect(200)
-				.end(function(err, res){
+				.end(function(err, res) {
+					expect(res).not.to.exist;
 					if (err && err.message !== 'socket hang up') return done(err);
 					expect(lastReapedFile).to.be.null;
 					done();
@@ -133,21 +136,21 @@ describe('Multer Autoreap with Errors', function() {
 		});
 
 		it('supports multer.single with an error in the response', function(done) {
-			var file = __dirname + '/unit_test.txt';
+			let file = __dirname + '/unit_test.txt';
 
 			request
 				.put('/upload-single')
 				.set('Accept', '*/*')
 				.attach('file-data', file, 'unit_test.txt')
-				.expect(200)
-				.end(function(err, res){
+				.end(function(err, res) {
+					expect(res).not.to.exist;
 					if (err && err.message !== 'socket hang up') return done(err);
 					expect(lastReapedFile).to.be.null;
 					done();
 				});
 
 		});
-		
+
 	});
 
 });

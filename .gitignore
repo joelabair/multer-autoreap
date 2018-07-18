@@ -3,12 +3,11 @@ lib-cov
 *.out
 *.pid
 *.gz
-*.komodoproject
+*.komodo*
 *.sublime-project
 *.sublime-workspace
-
+coverage
 pids
 logs
-.komodotools
 node_modules
 npm-debug.log

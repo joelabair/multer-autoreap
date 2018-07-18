@@ -1,0 +1,10 @@
+{
+    "node"          		: true,
+	"sub"					: true,
+	"undef"				: true,
+	"unused"				: false,
+	"esnext"				: true,
+	"experimental"	: [
+		"asyncawait"
+	]
+}

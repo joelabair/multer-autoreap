@@ -1,15 +1,14 @@
 const fs = require('fs');
-const util = require('util');
 const finished = require('on-finished');
 const debug = require('debug')('multer-autoreap:middleware');
 
+require('es6-object-assign/auto');
 
 const defaults = {
 	reapOnError: true
 };
 
-let options = Object.create(defaults);
-
+let options = Object.assign({}, defaults);
 
 // auto remove any uploaded files on response end
 // to persist uploaded files, simply move them to a permanent location,
@@ -73,11 +72,11 @@ Object.defineProperty(module.exports, 'options', {
 		if (obj instanceof Array) {
 			return options;
 		}
-		return util._extend(options, obj);
+		return Object.assign({}, defaults, obj);
 	},
 	get: function() {
 		return options;
 	}
 });
 
-module.exports.options = util._extend(options, defaults);
+module.exports.options = options;

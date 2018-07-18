@@ -55,7 +55,7 @@ router.use('/upload-b', autoReap, function(req, res, next) {
 
 [Multer](https://github.com/expressjs/multer) is an efficient `multipart/form-data` handling middleware that uses [busboy](https://github.com/mscdex/busboy).  Files encoded in a miltipart request body are piped to a temporary upload location (def: multer options dest ).  This can have the effect of leaving open an attack vector where disk space can be consumed by these temporary files.  Its prudent and generally good form to clean them up.  While [reap](https://github.com/visionmedia/reap) cleans based on age, multer-autoreap cleans them up as soon as the request is done.
 
-####Options
+#### Options
 
 ```js
 autoReap.options = {
